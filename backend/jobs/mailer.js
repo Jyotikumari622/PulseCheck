@@ -25,9 +25,10 @@ const sendStatusAlert = async ({ to, siteName, siteUrl, newStatus }) => {
     });
     console.log(`Alert email sent to ${to}: ${subject}`);
   } catch (err) {
-    // Don't crash the cron job if email fails — just log it
-    console.error('Failed to send alert email:', err.message);
-  }
+  console.error('[MAIL ERROR] Message:', err.message);
+  console.error('[MAIL ERROR] Code:', err.code);
+  console.error('[MAIL ERROR] Response code:', err.responseCode);
+}
 };
 
 module.exports = { sendStatusAlert };
