@@ -43,10 +43,9 @@ const checkOneSite = async (site) => {
   // Only alert if status actually CHANGED (up->down or down->up)
   // Skip alert on the very first check ever (previousStatus === 'unknown')
   const statusChanged = previousStatus !== 'unknown' && previousStatus !== checkData.status;
-console.log('[DEBUG] Site:', site.name);
-console.log('[DEBUG] Previous status:', previousStatus);
-console.log('[DEBUG] New status:', checkData.status);
-console.log('[DEBUG] Status changed:', statusChanged);
+console.log(
+  `[DEBUG] Site: ${site.name} | Previous: ${previousStatus} | New: ${checkData.status} | Changed: ${statusChanged}`
+);
   if (statusChanged) {
     try {
       const owner = await User.findById(site.user);
