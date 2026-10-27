@@ -1,105 +1,116 @@
-# Uptime & Health Monitor (MERN)
+# PulseCheck — Website Uptime Monitoring Platform
 
-A full-stack website/API monitoring platform. Add URLs, and a scheduled
-background job checks them every 5 minutes, logging status, HTTP code,
-and response time — with email alerts on up/down transitions.
-
-## 🔗 Live Demo
-- **App**: https://uptime-monitor.netlify.app/
-- **API**: https://uptimemonitor-1.onrender.com
-
-> Note: the backend runs on Render's free tier, which sleeps after ~15
-> minutes of inactivity. The first request after a period of inactivity
-> may take 30–60 seconds to respond while the server wakes up.
+PulseCheck is a full-stack website and API monitoring platform that automatically checks website availability every five minutes. It records HTTP status codes and response times, tracks uptime history, and sends email alerts when a monitored website goes down or recovers.
 
 ## Screenshots
-![Dashboard](screenshots/dashboard.png) | ![Site Detail](screenshots/site-detail.png) |
 
-## Stack
-- **Frontend**: React (Vite) + Tailwind CSS + Recharts + React Router
-- **Backend**: Node.js + Express + node-cron + Nodemailer
-- **Database**: MongoDB (Atlas)
-- **Deployment**: Netlify (frontend) · Render (backend) · MongoDB Atlas (database)
+![Dashboard](screenshots/dashboard.png)
+
+![Site Detail](screenshots/site-detail.png)
+
+## Tech Stack
+
+- **Frontend:** React, Vite, Tailwind CSS, Recharts, React Router
+- **Backend:** Node.js, Express.js, node-cron, Nodemailer
+- **Database:** MongoDB Atlas
+- **Authentication:** JWT and bcrypt
+- **Deployment:** Netlify and Render
 
 ## Features
-- JWT authentication (signup / login), passwords hashed with bcrypt
-- Add, view, and delete monitored sites — scoped per user
-- Scheduled background health checks every 5 minutes via `node-cron`
-- Tracks HTTP status code, response time, and up/down state per check
-- Uptime percentage calculated from check history
-- Email alerts sent only on status **transitions** (up→down / down→up),
-  not on every failed check
-- Response-time history chart (Recharts) per monitored site
-- External scheduler support (`/api/ping-check`) to keep checks reliable
-  on free-tier hosting
 
-## Project structure
+- User signup and login with JWT authentication and bcrypt password hashing.
+- Add, view, and delete monitored websites.
+- User-specific monitoring data.
+- Automated website health checks every five minutes using `node-cron`.
+- Track HTTP status codes, response times, and website availability.
+- Calculate uptime percentages from monitoring history.
+- Send email alerts only when a website's status changes from **Up to Down** or **Down to Up**.
+- Visualize response-time history with Recharts.
+- External scheduler integration through `/api/ping-check`, if configured, to help trigger monitoring checks on free-tier hosting.
+
+## Project Structure
+
+```text
+PulseCheck/
+├── backend/     # Express API and monitoring scheduler
+├── frontend/    # React dashboard
+└── screenshots/ # Application screenshots
 ```
-uptime-monitor/
-├── backend/    # Express API + cron job
-└── frontend/   # React dashboard
-```
 
-## Local setup
+## Local Setup
 
-### 1. Backend
+### Prerequisites
+
+- Node.js and npm
+- MongoDB Atlas account
+- Gmail account with an App Password for email alerts
+
+### 1. Backend Setup
+
 ```bash
 cd backend
 npm install
-cp .env.example .env   # then fill in real values
-npm run dev
 ```
 
-Required `.env` values:
+Copy `.env.example` to `.env` and configure the required environment variables.
+
 | Variable | Description |
 |---|---|
 | `MONGO_URI` | MongoDB Atlas connection string |
-| `JWT_SECRET` | any random long string |
+| `JWT_SECRET` | A secure, random secret string |
 | `EMAIL_USER` | Gmail address used to send alerts |
-| `EMAIL_APP_PASSWORD` | Gmail **App Password** (not your real password) — generate at https://myaccount.google.com/apppasswords |
+| `EMAIL_APP_PASSWORD` | Gmail App Password |
 
-### 2. Frontend
+Run the backend using the appropriate script configured in `backend/package.json`, for example:
+
 ```bash
-cd frontend
-npm install
-cp .env.example .env   # points at your local backend by default
 npm run dev
 ```
 
-Visit `http://localhost:5173`.
+### 2. Frontend Setup
 
-## How the monitoring works
-1. You add a site (name + URL) from the dashboard.
-2. Every 5 minutes, `node-cron` pings every stored site, records status/HTTP
-   code/response time, and keeps the last 100 checks per site.
-3. If a site's status **changes** (up→down or down→up), you get exactly
-   one email alert — not one per failed check.
-4. The dashboard polls the API every 60s so status stays reasonably fresh
-   without a manual refresh.
+Open a separate terminal:
 
-## Known limitation: free-tier hosting
-Render's free tier spins the server down after ~15 minutes of inactivity.
-When that happens, the in-process `node-cron` scheduler stops running until
-something wakes the server back up — so checks can be delayed.
+```bash
+cd frontend
+npm install
+```
 
-**Mitigation**: an external scheduler like [cron-job.org](https://cron-job.org)
-can hit `GET /api/ping-check` every 5 minutes to both trigger a real check
-cycle and keep the server awake. This is a deliberate design accommodation
-for free-tier PaaS hosting, documented here rather than hidden.
+Copy `.env.example` to `.env` and ensure `VITE_API_URL` points to your local backend API.
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+## How It Works
+
+1. Users add websites to monitor through the dashboard.
+2. A scheduled background job checks monitored websites every five minutes.
+3. Each check records the website's status, HTTP response code, and response time.
+4. Monitoring history is stored, with the latest 100 checks retained per website.
+5. Email alerts are triggered when a website transitions between Up and Down states, avoiding repeated alerts for the same ongoing failure.
+6. The dashboard periodically fetches updated data and displays website status and response-time history.
 
 ## Deployment
-- **Database**: MongoDB Atlas (free M0 cluster)
-- **Backend**: Render (Node web service, root dir `backend`, build `npm install`, start `npm start`)
-- **Frontend**: Netlify (root dir `frontend`, build `npm run build`, publish dir `dist`)
 
-Environment variables are set directly in each platform's dashboard
-(never committed to the repo — see `.gitignore`).
+- **Database:** MongoDB Atlas
+- **Backend:** Render — root directory `backend`, build command `npm install`, start command `npm start`
+- **Frontend:** Netlify — root directory `frontend`, build command `npm run build`, publish directory `dist`
 
-## Resume description
-> **Uptime & Health Monitor (MERN + Cloud + DevOps)** — Built and deployed
-> a full-stack website/API monitoring platform. Implements JWT auth,
-> scheduled background health checks via node-cron, response-time
-> tracking, and email alerting limited to state transitions. Deployed
-> across three cloud services (Netlify, Render, MongoDB Atlas) and
-> documented a real free-tier hosting constraint around scheduled job
-> reliability, with an external-scheduler mitigation.
+Configure environment variables through the respective hosting dashboards. Never commit `.env` files or expose credentials in the repository.
+
+## Hosting Considerations
+
+On Render's free tier, the backend may sleep after a period of inactivity. Since `node-cron` runs inside the backend process, scheduled checks may be delayed while the service is inactive.
+
+An external scheduler may help trigger checks, provided the `/api/ping-check` endpoint is implemented and appropriately secured.
+
+## Resume Description
+
+**PulseCheck — Website Uptime Monitoring Platform | MERN Stack, Cloud & DevOps**
+
+Developed a full-stack website monitoring platform featuring JWT authentication, scheduled health checks, HTTP status and response-time tracking, uptime history, and transition-based email alerts. Integrated React, Node.js, Express.js, and MongoDB Atlas, with frontend and backend deployment using Netlify and Render.
